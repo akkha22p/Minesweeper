@@ -26,72 +26,47 @@ import java.util.*
 
 class TicTacToeView(context: Context?, attrs: AttributeSet?) : View(context, attrs) {
 
-    private var paintBackground: Paint = Paint()
-    private var paintLine: Paint = Paint()
-    private var paintText: Paint = Paint()
+    private var intBackground: Paint = Paint()
     private var paintRect: Paint = Paint()
-    private var bitmapBg = BitmapFactory.decodeResource(resources, R.drawable.mabomb)
+    private var paintText: Paint = Paint()
+    private var bombBackground: Paint = Paint()
+    private var bomb = BitmapFactory.decodeResource(resources, R.drawable.mabomb)
     private var flag = BitmapFactory.decodeResource(resources, R.drawable.flag)
+    private var field = BitmapFactory.decodeResource(resources, R.drawable.field)
 
-    private var toDrawI = 0
-    private var toDrawJ = 0
     private var over = false
     private var win = false
     private var check = false
 
     init {
 
-        TicTacToeModel.resetModel()
+        TicTacToeModel.setModel()
 
-        paintBackground.color = Color.BLACK
-
-        paintBackground.style = Paint.Style.FILL
-
-        paintLine.color = Color.WHITE
-        paintLine.style = Paint.Style.STROKE
-        paintLine.strokeWidth = 8f
+        intBackground.color = Color.GRAY
+        intBackground.style = Paint.Style.FILL
 
         paintRect.color = Color.GRAY
+        paintRect.style = Paint.Style.FILL
+
+        bombBackground.color = Color.RED
+        bombBackground.style = Paint.Style.FILL
 
         paintText.color = Color.BLACK
-        paintText.textSize = 10f
+        paintText.textSize = 9f
+
     }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
 
         paintText.textSize = height / 8f
-        flag = Bitmap.createScaledBitmap(flag, width / 5, height / 5, false)
-        bitmapBg = Bitmap.createScaledBitmap(bitmapBg, width / 5, height / 5, false)
+        flag = Bitmap.createScaledBitmap(flag, (width / 5)-1, (width / 5)-1, false)
+        bomb = Bitmap.createScaledBitmap(bomb, (width / 5)-1, (height / 5)-1, false)
+        field = Bitmap.createScaledBitmap(field, width / 5, height / 5, false)
     }
 
     override fun onDraw(canvas: Canvas?) {
-        canvas?.drawRect(0f, 0f, width.toFloat(), height.toFloat(), paintBackground)
-        drawPlayers(canvas, toDrawI, toDrawJ)
-        drawGameBoard(canvas)
-    }
-
-    private fun drawGameBoard(canvas: Canvas?) {
-        drawBorder(canvas)
-
-        drawLines(canvas)
-    }
-
-    private fun drawLines(canvas: Canvas?) {
-        canvas?.drawLine((width / 5).toFloat(), 0f, (width / 5).toFloat(), height.toFloat(), paintLine)
-        canvas?.drawLine((2 * width / 5).toFloat(), 0f, (2 * width / 5).toFloat(), height.toFloat(), paintLine)
-        canvas?.drawLine((3 * width / 5).toFloat(), 0f, (3 * width / 5).toFloat(), height.toFloat(), paintLine)
-        canvas?.drawLine((4 * width / 5).toFloat(), 0f, (4 * width / 5).toFloat(), height.toFloat(), paintLine)
-        canvas?.drawLine((6 * width / 5).toFloat(), 0f, (6 * width / 5).toFloat(), height.toFloat(), paintLine)
-    }
-
-    private fun drawBorder(canvas: Canvas?) {
-        canvas?.drawRect(0f, 0f, width.toFloat(), height.toFloat(), paintLine)
-        canvas?.drawLine(0f, (height / 5).toFloat(), width.toFloat(), (height / 5).toFloat(), paintLine)
-        canvas?.drawLine(0f, (2 * height / 5).toFloat(), width.toFloat(), (2 * height / 5).toFloat(), paintLine)
-        canvas?.drawLine(0f, (3 * height / 5).toFloat(), width.toFloat(), (3 * height / 5).toFloat(), paintLine)
-        canvas?.drawLine(0f, (4 * height / 5).toFloat(), width.toFloat(), (4 * height / 5).toFloat(), paintLine)
-        canvas?.drawLine(0f, (6 * height / 5).toFloat(), width.toFloat(), (6 * height / 5).toFloat(), paintLine)
+        drawField(canvas)
     }
 
     override fun onTouchEvent(event: MotionEvent?): Boolean {
@@ -104,6 +79,7 @@ class TicTacToeView(context: Context?, attrs: AttributeSet?) : View(context, att
                 TicTacToeModel.getFieldContent(tX, tY).wasClicked = true
                 if (check) {
                     TicTacToeModel.getFieldContent(tX, tY).setIsFlagged(true)
+
                 }
             }
         }
@@ -111,47 +87,53 @@ class TicTacToeView(context: Context?, attrs: AttributeSet?) : View(context, att
         return true
     }
 
-    private fun drawPlayers(canvas: Canvas?, i: Int, j: Int) {
+    private fun drawField(canvas: Canvas?) {
 
         for (i in 0..4) {
             for (j in 0..4) {
                 if (TicTacToeModel.getFieldContent(i, j).wasClicked) {
-
-                    checkIfBombAndNotFlag(canvas, i, j)
-                    checkIfBombAndFlag(canvas, i, j)
-                    checkIfEmptyAndFlag(canvas, i, j)
-                    checkIfIntAndFlag(canvas, i, j)
-                    checkIfIntAndNotFlag(canvas, i, j)
+                    decideWhatToDrawIfClicked(canvas, i, j)
+                }
+                else{
+                    canvas?.drawBitmap(field, (i * width / 5).toFloat(), (j * height / 5).toFloat(), null)
                 }
             }
         }
-        checkWinning()
+        checkForWin()
     }
 
-    public fun checkWinning() {
-        if (TicTacToeModel.checkIfWin()) {
-            win = true
-            over = true
-            Snackbar.make(this,"You Won", Snackbar.LENGTH_LONG).show()
-        }
-        else if(!TicTacToeModel.checkIfWin() && over){
-            Snackbar.make(this,"You Lose", Snackbar.LENGTH_LONG).show()
-        }
+    private fun decideWhatToDrawIfClicked(canvas: Canvas?, i: Int, j: Int){
+        checkIfBombAndNotFlag(canvas, i, j)
+        checkIfBombAndFlag(canvas, i, j)
+        checkIfEmptyAndFlag(canvas, i, j)
+        checkIfIntAndFlag(canvas, i, j)
+        checkIfIntAndNotFlag(canvas, i, j)
     }
 
-    public fun checkIfBombAndNotFlag(canvas: Canvas?, i: Int, j: Int) {
+    private fun drawBomb(canvas: Canvas?, i: Int, j: Int){
+        canvas?.drawRect(
+            (i * width / 5).toFloat(),
+            (j * height / 5).toFloat(),
+            (i * width / 5).toFloat() + (width / 5),
+            (j * width / 5).toFloat() + (width / 5),
+            bombBackground
+        )
+        canvas?.drawBitmap(bomb, (i * width / 5).toFloat(), (j * height / 5).toFloat(), null)
+    }
+
+    private fun checkIfBombAndNotFlag(canvas: Canvas?, i: Int, j: Int) {
         if (TicTacToeModel.getFieldContent(i, j).getTypes() == 0 && TicTacToeModel.getFieldContent(
                 i,
                 j
             ).getIsFlagged() == false
         ) {
-            canvas?.drawBitmap(bitmapBg, (i * width / 5).toFloat(), (j * height / 5).toFloat(), null)
+            drawBomb(canvas, i, j)
             over = true
-            showAllBomb(canvas)
+            showAllBombs(canvas)
         }
     }
 
-    public fun checkIfBombAndFlag(canvas: Canvas?, i: Int, j: Int) {
+    private fun checkIfBombAndFlag(canvas: Canvas?, i: Int, j: Int) {
         if (TicTacToeModel.getFieldContent(i, j).getTypes() == 0 && TicTacToeModel.getFieldContent(
                 i,
                 j
@@ -161,14 +143,13 @@ class TicTacToeView(context: Context?, attrs: AttributeSet?) : View(context, att
         }
     }
 
-    public fun checkIfEmptyAndFlag(canvas: Canvas?, i: Int, j: Int) {
+    private fun checkIfEmptyAndFlag(canvas: Canvas?, i: Int, j: Int) {
         if (TicTacToeModel.getFieldContent(i, j).getTypes() == -1) {
-            //canvas?.drawBitmap(bitmapBg2, (i * width / 5).toFloat(), (j * height / 5).toFloat(), null)
             canvas?.drawRect(
-                (i * width / 5).toFloat(),
-                (j * height / 5).toFloat(),
-                (i * width / 5).toFloat() + (width / 5),
-                (j * width / 5).toFloat() + (width / 5),
+                (i * width / 5).toFloat()+1,
+                (j * height / 5).toFloat()+1,
+                (i * width / 5).toFloat() + (width / 5)-1,
+                (j * width / 5).toFloat() + (width / 5)-1,
                 paintRect
             )
 
@@ -179,52 +160,69 @@ class TicTacToeView(context: Context?, attrs: AttributeSet?) : View(context, att
         }
     }
 
-    public fun checkIfIntAndFlag(canvas: Canvas?, i: Int, j: Int) {
-        if (TicTacToeModel.getFieldContent(i, j).getTypes() != 0 && TicTacToeModel.getFieldContent(
-                i,
-                j
-            ).getIsFlagged() == true
+    private fun checkIfIntAndFlag(canvas: Canvas?, i: Int, j: Int) {
+        if (TicTacToeModel.getFieldContent(i, j).getTypes() != 0 && TicTacToeModel.getFieldContent(i, j).getIsFlagged() == true
         ) {
-            drawInt(canvas, i, j)
+            drawIntOnField(canvas, i, j)
             over = true
         }
     }
 
-    public fun checkIfIntAndNotFlag(canvas: Canvas?, i: Int, j: Int) {
+    private fun checkIfIntAndNotFlag(canvas: Canvas?, i: Int, j: Int) {
         if (TicTacToeModel.getFieldContent(i, j).getTypes() != 0 && TicTacToeModel.getFieldContent(
                 i,
                 j
             ).getTypes() != -1 && TicTacToeModel.getFieldContent(i, j).getIsFlagged() == false
         ) {
-            drawInt(canvas, i, j)
+            drawIntOnField(canvas, i, j)
+        }
+    }
+
+    private fun checkForWin() {
+        if (TicTacToeModel.checkIfWin()) {
+            win = true
+            over = true
+            Snackbar.make(this,"You Won", Snackbar.LENGTH_LONG).show()
+        }
+        else if(!TicTacToeModel.checkIfWin() && over){
+            Snackbar.make(this,"You Lose", Snackbar.LENGTH_LONG).show()
         }
     }
 
     private fun revealHelper(canvas: Canvas?, i: Int, j: Int) {
 
+        //Return if out of game board
         if (i > 4 || i < 0 || j > 4 || j < 0) {
             return
         }
-        if (TicTacToeModel.getFieldContent(i, j).getWasClick()) {
-            return
-        } else if (TicTacToeModel.getFieldContent(i, j).getTypes() == -1) {
-            TicTacToeModel.getFieldContent(i, j).wasClicked = true;
-            canvas?.drawRect(
-                (i * width / 5).toFloat(),
-                (j * height / 5).toFloat(),
-                (i * width / 5).toFloat() + (width / 5),
-                (j * width / 5).toFloat() + (width / 5),
-                paintRect
-            )
-            reveal(canvas, i, j);
-        } else if (TicTacToeModel.getFieldContent(i, j).getTypes() != -1) {
-            TicTacToeModel.getFieldContent(i, j).wasClicked = true;
-            drawInt(canvas, i, j)
+
+        when {
+            //Return if the field was already clicked
+            TicTacToeModel.getFieldContent(i, j).getWasClick() -> return
+
+            //Reveal empty fields aroud, if field's type is -1
+            TicTacToeModel.getFieldContent(i, j).getTypes() == -1 -> {
+                TicTacToeModel.getFieldContent(i, j).wasClicked = true
+                canvas?.drawRect(
+                    (i * width / 5).toFloat()+1,
+                    (j * height / 5).toFloat()+1,
+                    (i * width / 5).toFloat() + (width / 5)-1,
+                    (j * width / 5).toFloat() + (width / 5)-1,
+                    paintRect
+                )
+                reveal(canvas, i, j)
+            }
+
+            //Draw number on the selected field, if field's type is not -1 and not a bomb
+            TicTacToeModel.getFieldContent(i, j).getTypes() != -1 -> {
+                TicTacToeModel.getFieldContent(i, j).wasClicked = true
+                drawIntOnField(canvas, i, j)
+            }
         }
 
     }
 
-    public fun reveal(canvas: Canvas?, i: Int, j: Int) {
+    private fun reveal(canvas: Canvas?, i: Int, j: Int) {
 
         revealHelper(canvas, i - 1, j - 1);
 
@@ -244,7 +242,7 @@ class TicTacToeView(context: Context?, attrs: AttributeSet?) : View(context, att
 
     }
 
-    private fun showAllBomb(canvas: Canvas?) {
+    private fun showAllBombs(canvas: Canvas?) {
         for (i in 0..4) {
             for (j in 0..4) {
                 if (TicTacToeModel.getFieldContent(i, j).getTypes() == 0 && !TicTacToeModel.getFieldContent(
@@ -252,37 +250,32 @@ class TicTacToeView(context: Context?, attrs: AttributeSet?) : View(context, att
                         j
                     ).wasClicked
                 ) {
-                    canvas?.drawBitmap(bitmapBg, (i * width / 5).toFloat(), (j * height / 5).toFloat(), null)
+                    drawBomb(canvas, i, j)
                 }
             }
         }
     }
 
-    public fun getGameStatus(): Boolean{
-        return win
-    }
-
-    public fun isCheck() {
-        check = true
-    }
-
-    public fun notCheck() {
-        check = false
-    }
-
-    private fun drawInt(canvas: Canvas?, i: Int, j: Int) {
+    private fun drawIntOnField(canvas: Canvas?, i: Int, j: Int) {
         val centerX =
-            ((i * width / 5 + width / 5) - (5 + width / 5) + ((width / 5) / 2) - (paintText.textSize / 4)).toFloat()
-        val centerY = (j * height / 5 + height / 5) - ((paintText.textSize / 3)).toFloat()
+            ((i * width / 5 + width / 5) - (5 + width / 5) + ((width / 5) / 2) - (paintText.textSize / 4))
+        val centerY = (j * height / 5 + height / 5) - ((paintText.textSize / 3))
 
         canvas?.drawRect(
-            (i * width / 5).toFloat(),
-            (j * height / 5).toFloat(),
-            (i * width / 5).toFloat() + (width / 5),
-            (j * width / 5).toFloat() + (width / 5),
-            paintRect
+            (i * width / 5).toFloat()+1,
+            (j * height / 5).toFloat()+1,
+            (i * width / 5).toFloat() + (width / 5)-1,
+            (j * width / 5).toFloat() + (width / 5)-1,
+            intBackground
         )
         canvas?.drawText(TicTacToeModel.getFieldContent(i, j).getTypes().toString(), centerX, centerY, paintText)
+    }
+
+    public fun setGame() {
+
+        TicTacToeModel.setModel()
+        over = false
+        invalidate()
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
@@ -293,10 +286,12 @@ class TicTacToeView(context: Context?, attrs: AttributeSet?) : View(context, att
         setMeasuredDimension(d, d)
     }
 
-    public fun resetGame() {
-
-        TicTacToeModel.resetModel()
-        over = false
-        invalidate()
+    public fun isCheck() {
+        check = true
     }
+
+    public fun notCheck() {
+        check = false
+    }
+
 }

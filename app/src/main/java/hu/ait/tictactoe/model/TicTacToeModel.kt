@@ -5,55 +5,69 @@ import android.util.Log
 import java.util.*
 import kotlin.experimental.and
 
-//Use 'object' to make it a singletonL just one object
+//Use 'object' to make it a singletonL object
 object TicTacToeModel {
 
-
     private var countBomb = 0
-    @Nullable private val fieldMatrix: Array<Array<Field>> = arrayOf(
-        arrayOf(
-            Field(10, 5, true, false),
-            Field(10, 6, false, false),
-            Field(10, 6, false, false),
-            Field(10, 8, false, false),
-            Field(10, 8, false, false)
-        ),
-        arrayOf(
-            Field(10, 5, true, false),
-            Field(10, 8, false, false),
-            Field(10, 8, false, false),
-            Field(10, 8, false, false),
-            Field(10, 8, false, false)
-        ),
-        arrayOf(
-            Field(10, 5, true, false),
-            Field(10, 8, false, false),
-            Field(10, 8, false, false),
-            Field(10, 8, false, false),
-            Field(10, 8, false, false)
-        ),
-        arrayOf(
-            Field(10, 5, true, false),
-            Field(10, 8, false, false),
-            Field(10, 8, false, false),
-            Field(10, 8, false, false),
-            Field(10, 8, false, false)
-        ),
-        arrayOf(
-            Field(10, 5, true, false),
-            Field(10, 8, false, false),
-            Field(10, 8, false, false),
-            Field(10, 8, false, false),
-            Field(10, 8, false, false)
-        )
-    )
+
+    @Nullable  private val fieldMatrix: Array<Array<Field>> = Array(5, { Array(5, { Field(10, 5, true, false)}) })
+
+//    @Nullable private val fieldMatrix: Array<Array<Field>> = arrayOf(
+//        arrayOf(
+//            Field(10, 5, true, false),
+//            Field(10, 6, false, false),
+//            Field(10, 6, false, false),
+//            Field(10, 8, false, false),
+//            Field(10, 8, false, false)
+//        ),
+//        arrayOf(
+//            Field(10, 5, true, false),
+//            Field(10, 8, false, false),
+//            Field(10, 8, false, false),
+//            Field(10, 8, false, false),
+//            Field(10, 8, false, false)
+//        ),
+//        arrayOf(
+//            Field(10, 5, true, false),
+//            Field(10, 8, false, false),
+//            Field(10, 8, false, false),
+//            Field(10, 8, false, false),
+//            Field(10, 8, false, false)
+//        ),
+//        arrayOf(
+//            Field(10, 5, true, false),
+//            Field(10, 8, false, false),
+//            Field(10, 8, false, false),
+//            Field(10, 8, false, false),
+//            Field(10, 8, false, false)
+//        ),
+//        arrayOf(
+//            Field(10, 5, true, false),
+//            Field(10, 8, false, false),
+//            Field(10, 8, false, false),
+//            Field(10, 8, false, false),
+//            Field(10, 8, false, false)
+//        )
+//    )
+
+    fun setModel(){
+        (0..4).forEach { i ->
+            (0..4).forEach { j ->
+                getFieldContent(i, j).setTypes(-10)
+                getFieldContent(i, j).setIsFlagged(false)
+                getFieldContent(i, j).wasClicked = false
+            }
+        }
+        generateBomb()
+        generateField()
+    }
 
     private fun generateBomb() {
         countBomb = 0
         val random = Random(System.currentTimeMillis())
-        var randomI = 0
-        var randomJ = 0
-        for (i in 0..2) {
+        var randomI: Int
+        var randomJ: Int
+        (0..2).forEach {
             randomI = random.nextInt(4)
             randomJ = random.nextInt(4)
 
@@ -65,11 +79,7 @@ object TicTacToeModel {
 
     }
 
-    public fun getCountBomb(): Int{
-        return countBomb
-    }
-
-    public fun getNeighbor(i: Int, j: Int): Int {
+    private fun generateMinesAroundNonBorderField(i: Int, j: Int): Int {
         var countBomb = 0
 
         if (getFieldContent(i, j).getTypes() == 0) {
@@ -111,7 +121,7 @@ object TicTacToeModel {
         return countBomb
     }
 
-    private fun getN0Neighbor(i: Int, j: Int): Int {
+    private fun generateMinesAroundN0Field(i: Int, j: Int): Int {
         var countBomb = 0
 
         if (getFieldContent(i - 1, j).getTypes() == 0) {
@@ -128,7 +138,7 @@ object TicTacToeModel {
         return countBomb
     }
 
-    private fun get0NNeighbor(i: Int, j: Int): Int {
+    private fun generateMinesAround0NField(i: Int, j: Int): Int {
         var countBomb = 0
         if (getFieldContent(i, j).getTypes() == 0) {
             return -1
@@ -149,7 +159,7 @@ object TicTacToeModel {
         return countBomb
     }
 
-    private fun getI0Neighbor(i: Int, j: Int): Int {
+    private fun generateMinesAroundI0Field(i: Int, j: Int): Int {
         var countBomb = 0
         if (getFieldContent(i, j).getTypes() == 0) {
             return -1
@@ -178,7 +188,7 @@ object TicTacToeModel {
         return countBomb
     }
 
-    private fun getINNeighbor(i: Int, j: Int): Int {
+    private fun generateMinesAroundINField(i: Int, j: Int): Int {
         var countBomb = 0
         if (getFieldContent(i, j).getTypes() == 0) {
             return -1
@@ -207,7 +217,7 @@ object TicTacToeModel {
         return countBomb
     }
 
-    private fun getJ0Neighbor(i: Int, j: Int): Int {
+    private fun generateMinesAroundJ0Field(i: Int, j: Int): Int {
         var countBomb = 0
         if (getFieldContent(i, j).getTypes() == 0) {
             return -1
@@ -236,7 +246,7 @@ object TicTacToeModel {
         return countBomb
     }
 
-    private fun getJNNeighbor(i: Int, j: Int): Int {
+    private fun generateMinesAroundJNField(i: Int, j: Int): Int {
         var countBomb = 0
         if (getFieldContent(i, j).getTypes() == 0) {
             return -1
@@ -266,7 +276,7 @@ object TicTacToeModel {
         return countBomb
     }
 
-    private fun get00Neighbor(): Int {
+    private fun generateMinesAround00Field(): Int {
         var countBomb = 0
 
         if (getFieldContent(0, 0).getTypes() == 0) {
@@ -284,7 +294,7 @@ object TicTacToeModel {
         return countBomb
     }
 
-    public fun getNNNeighbor(): Int {
+    fun getNNNeighbor(): Int {
         var countBomb = 0
         if (getFieldContent(4, 4).getTypes() == 0) {
             return -1
@@ -305,64 +315,39 @@ object TicTacToeModel {
         for (i in 0..4) {
             for (j in 0..4) {
                 var bomb = 0
-                if (i != 0 && i != 4 && j != 0 && j != 4) {
-                    bomb = getNeighbor(i, j)
-                } else if (i == 0 && j == 0) {
-                    bomb = get00Neighbor()
-                } else if (i == 4 && j == 4) {
-                    bomb = getNNNeighbor()
-                } else if (i == 0 && j == 4) {
-                    bomb = get0NNeighbor(i, j)
-                } else if (i == 4 && j == 0) {
-                    bomb = getN0Neighbor(i, j)
-                } else if (j == 0) {
-                    bomb = getJ0Neighbor(i, j)
-                } else if (j == 4) {
-                    bomb = getJNNeighbor(i, j)
-                } else if (i == 0) {
-                    bomb = getI0Neighbor(i, j)
-                } else if (i == 4) {
-                    bomb = getINNeighbor(i, j)
+                when {
+                    i != 0 && i != 4 && j != 0 && j != 4 -> bomb = generateMinesAroundNonBorderField(i, j)
+                    i == 0 && j == 0 -> bomb = generateMinesAround00Field()
+                    i == 4 && j == 4 -> bomb = getNNNeighbor()
+                    i == 0 && j == 4 -> bomb = generateMinesAround0NField(i, j)
+                    i == 4 && j == 0 -> bomb = generateMinesAroundN0Field(i, j)
+                    j == 0 -> bomb = generateMinesAroundJ0Field(i, j)
+                    j == 4 -> bomb = generateMinesAroundJNField(i, j)
+                    i == 0 -> bomb = generateMinesAroundI0Field(i, j)
+                    i == 4 -> bomb = generateMinesAroundINField(i, j)
                 }
 
-                if (bomb == 0) {
-                    getFieldContent(i, j).setTypes(-1)
-                } else if (bomb == -1) {
-                    getFieldContent(i, j).setTypes(0)
-                } else {
-                    getFieldContent(i, j).setTypes(bomb)
+                when (bomb) {
+                    0 -> getFieldContent(i, j).setTypes(-1)
+                    -1 -> getFieldContent(i, j).setTypes(0)
+                    else -> getFieldContent(i, j).setTypes(bomb)
                 }
             }
         }
     }
 
-    public fun getFieldContent(x: Int, y: Int) = fieldMatrix[x][y]
+    fun getFieldContent(x: Int, y: Int) = fieldMatrix[x][y]
 
-
-    public fun resetModel(){
-        for(i in 0..4){
-            for(j in 0..4){
-                getFieldContent(i, j).setTypes(-10)
-                getFieldContent(i, j).setIsFlagged(false)
-                getFieldContent(i, j).wasClicked = false
-            }
-        }
-        generateBomb()
-        generateField()
-    }
-
-    public fun checkIfWin(): Boolean{
+    fun checkIfWin(): Boolean{
         var countCurrentBomb = 0
-        for(i in 0..4){
-            for(j in 0..4){
+        (0..4).forEach { i ->
+            (0..4).forEach { j ->
                 if(getFieldContent(i, j).getTypes() == 0 && getFieldContent(i, j).isFlagged && getFieldContent(i, j).wasClicked){
                     countCurrentBomb++
                 }
             }
         }
-        if(countCurrentBomb == countBomb){
-            return true
-        }
+        if(countCurrentBomb == countBomb) return true
 
         return false
     }

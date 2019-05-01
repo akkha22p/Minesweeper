@@ -15,7 +15,7 @@ class GameActivity : AppCompatActivity() {
 
         btnRestart.setOnClickListener {
             toggleButton.isChecked = false
-            tictactoeView.resetGame()
+            tictactoeView.setGame()
         }
 
         toggleButton?.setOnCheckedChangeListener { buttonView, isChecked ->

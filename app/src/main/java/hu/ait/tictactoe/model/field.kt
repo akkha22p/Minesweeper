@@ -6,24 +6,24 @@ data class Field(
     var type: Int, var minesAround: Int,
     var isFlagged: Boolean, var wasClicked: Boolean) {
 
-
-    public fun setTypes(newType: Int) {
+    //Type- bomb or number
+    fun setTypes(newType: Int) {
         type = newType
     }
 
-    public fun getTypes(): Int? = type
+    fun getTypes(): Int? = type
 
 
-    public fun setIsFlagged(flag: Boolean) {
+    fun setIsFlagged(flag: Boolean) {
         isFlagged = flag
     }
 
-    public fun getIsFlagged(): Boolean? = isFlagged
+    fun getIsFlagged(): Boolean? = isFlagged
 
-    public fun wasClicked(click: Boolean) {
+    fun wasClicked(click: Boolean) {
         wasClicked = click
     }
 
-    public fun getWasClick(): Boolean = wasClicked
+    fun getWasClick(): Boolean = wasClicked
 
 }
