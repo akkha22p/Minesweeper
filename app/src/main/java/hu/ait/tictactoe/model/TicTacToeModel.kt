@@ -10,7 +10,9 @@ object TicTacToeModel {
 
     private var countBomb = 0
 
-    @Nullable  private val fieldMatrix: Array<Array<Field>> = Array(5, { Array(5, { Field(10, 5, true, false)}) })
+    private val gridNum = 8
+
+    @Nullable  private val fieldMatrix: Array<Array<Field>> = Array(gridNum, { Array(gridNum, { Field(10, 0, true, false)}) })
 
 //    @Nullable private val fieldMatrix: Array<Array<Field>> = arrayOf(
 //        arrayOf(
@@ -51,8 +53,8 @@ object TicTacToeModel {
 //    )
 
     fun setModel(){
-        (0..4).forEach { i ->
-            (0..4).forEach { j ->
+        (0..gridNum-1).forEach { i ->
+            (0..gridNum-1).forEach { j ->
                 getFieldContent(i, j).setTypes(-10)
                 getFieldContent(i, j).setIsFlagged(false)
                 getFieldContent(i, j).wasClicked = false
@@ -67,14 +69,16 @@ object TicTacToeModel {
         val random = Random(System.currentTimeMillis())
         var randomI: Int
         var randomJ: Int
-        (0..2).forEach {
-            randomI = random.nextInt(4)
-            randomJ = random.nextInt(4)
+
+        while(countBomb < 10) {
+            randomI = random.nextInt(gridNum-1)
+            randomJ = random.nextInt(gridNum-1)
 
             if(getFieldContent(randomI, randomJ).getTypes() != 0){
                 getFieldContent(randomI, randomJ).setTypes(0)
                 countBomb++
             }
+
         }
 
     }
@@ -296,35 +300,35 @@ object TicTacToeModel {
 
     fun getNNNeighbor(): Int {
         var countBomb = 0
-        if (getFieldContent(4, 4).getTypes() == 0) {
+        if (getFieldContent(gridNum-1, gridNum-1).getTypes() == 0) {
             return -1
         }
-        if (getFieldContent(3, 4).getTypes() == 0) {
+        if (getFieldContent(gridNum-2, gridNum-1).getTypes() == 0) {
             countBomb++
         }
-        if (getFieldContent(4, 3).getTypes() == 0) {
+        if (getFieldContent(gridNum-1, gridNum-2).getTypes() == 0) {
             countBomb++
         }
-        if (getFieldContent(3, 3).getTypes() == 0) {
+        if (getFieldContent(gridNum-2, gridNum-2).getTypes() == 0) {
             countBomb++
         }
         return countBomb
     }
 
     private fun generateField() {
-        for (i in 0..4) {
-            for (j in 0..4) {
+        for (i in 0..gridNum-1) {
+            for (j in 0..gridNum-1) {
                 var bomb = 0
                 when {
-                    i != 0 && i != 4 && j != 0 && j != 4 -> bomb = generateMinesAroundNonBorderField(i, j)
+                    i != 0 && i != gridNum-1 && j != 0 && j != gridNum-1 -> bomb = generateMinesAroundNonBorderField(i, j)
                     i == 0 && j == 0 -> bomb = generateMinesAround00Field()
-                    i == 4 && j == 4 -> bomb = getNNNeighbor()
-                    i == 0 && j == 4 -> bomb = generateMinesAround0NField(i, j)
-                    i == 4 && j == 0 -> bomb = generateMinesAroundN0Field(i, j)
+                    i == gridNum-1 && j == gridNum-1 -> bomb = getNNNeighbor()
+                    i == 0 && j == gridNum-1 -> bomb = generateMinesAround0NField(i, j)
+                    i == gridNum-1 && j == 0 -> bomb = generateMinesAroundN0Field(i, j)
                     j == 0 -> bomb = generateMinesAroundJ0Field(i, j)
-                    j == 4 -> bomb = generateMinesAroundJNField(i, j)
+                    j == gridNum-1 -> bomb = generateMinesAroundJNField(i, j)
                     i == 0 -> bomb = generateMinesAroundI0Field(i, j)
-                    i == 4 -> bomb = generateMinesAroundINField(i, j)
+                    i == gridNum-1 -> bomb = generateMinesAroundINField(i, j)
                 }
 
                 when (bomb) {
@@ -340,8 +344,8 @@ object TicTacToeModel {
 
     fun checkIfWin(): Boolean{
         var countCurrentBomb = 0
-        (0..4).forEach { i ->
-            (0..4).forEach { j ->
+        (0..gridNum-1).forEach { i ->
+            (0..gridNum-1).forEach { j ->
                 if(getFieldContent(i, j).getTypes() == 0 && getFieldContent(i, j).isFlagged && getFieldContent(i, j).wasClicked){
                     countCurrentBomb++
                 }
