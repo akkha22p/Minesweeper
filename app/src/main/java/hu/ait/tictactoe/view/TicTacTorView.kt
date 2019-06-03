@@ -166,6 +166,7 @@ class TicTacToeView(context: Context?, attrs: AttributeSet?) : View(context, att
         if (TicTacToeModel.getFieldContent(i, j).getTypes() != 0 && TicTacToeModel.getFieldContent(i, j).getIsFlagged() == true
         ) {
             drawIntOnField(canvas, i, j)
+            over = false
             over = true
         }
     }
